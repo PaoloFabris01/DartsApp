@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DartsMaster">
+<meta name="theme-color" content="#0d0f0e">
+<title>🎯 DartsMaster</title>
+<style>
+:root {
+  --bg:     #0d0f0e;
+  --surf:   #141917;
+  --card:   #1b201e;
+  --bord:   #2c3530;
+  --gold:   #c9a84c;
+  --gold2:  #e8c96a;
+  --green:  #2d6a4f;
+  --greenl: #40916c;
+  --red:    #c1432a;
+  --text:   #e8e4d8;
+  --muted:  #788a80;
+  --white:  #f4f0e6;
+  --fn-d:   'Impact','Arial Black','Franklin Gothic Heavy',sans-serif;
+  --fn-b:   'Segoe UI','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fn-b);font-size:16px;overflow:hidden}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.screen.hidden{display:none}
+#s-setup{overflow-y:auto}
+
+/* ── SETUP ── */
+.setup-inner{padding:18px;max-width:520px;margin:0 auto}
+.s-logo{font-family:var(--fn-d);font-size:2.6rem;color:var(--gold);letter-spacing:3px;margin-bottom:2px}
+.s-logo span{color:var(--white)}
+.s-sub{font-size:.88rem;color:var(--muted);margin-bottom:22px}
+.sblk{background:var(--card);border:1px solid var(--bord);border-radius:14px;padding:16px;margin-bottom:14px}
+.slbl{font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.legs-row{display:flex;gap:7px;flex-wrap:wrap}
+.legs-btn{flex:1;min-width:44px;padding:11px 0;border-radius:9px;border:1px solid var(--bord);background:var(--surf);color:var(--text);font-family:var(--fn-b);font-weight:700;font-size:1.15rem;cursor:pointer;transition:all .15s}
+.legs-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bord)}
+.prow:last-child{border:none;margin:0;padding:0}
+.pname-in{background:var(--surf);border:1px solid var(--bord);border-radius:9px;color:var(--text);font-family:var(--fn-b);font-weight:600;font-size:1rem;padding:9px 12px;width:100%}
+.pname-in:focus{outline:none;border-color:var(--gold)}
+.tbot{padding:9px 12px;border-radius:9px;border:1px solid var(--bord);background:var(--surf);color:var(--muted);font-family:var(--fn-b);font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tbot.on{background:var(--green);border-color:var(--greenl);color:#d0ffd6}
+.rem-p{width:34px;height:34px;border-radius:50%;border:1px solid var(--bord);background:none;color:var(--muted);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.bot-cfg{display:none;grid-column:1/-1;background:var(--surf);border:1px solid var(--bord);border-radius:9px;padding:12px;margin-top:5px}
+.bot-cfg.show{display:block}
+.bot-cfg label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:5px}
+.avg-lbl{font-size:1.15rem;font-weight:700;color:var(--gold);margin-bottom:7px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.rng-ends{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:4px}
+.add-p{width:100%;padding:11px;border:1.5px dashed var(--bord);border-radius:9px;background:none;color:var(--muted);font-family:var(--fn-b);font-weight:700;font-size:.95rem;cursor:pointer;transition:all .15s;margin-top:8px}
+.add-p:hover{border-color:var(--gold);color:var(--gold)}
+.start-btn{width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--bg);font-family:var(--fn-d);font-size:1.6rem;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 20px rgba(201,168,76,.28);margin-top:6px;transition:all .2s}
+
+/* ── GAME SCREEN ── */
+#s-game{overflow:hidden}
+header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 14px 9px;border-bottom:1px solid var(--bord)}
+.logo{font-family:var(--fn-d);font-size:1.5rem;letter-spacing:3px;color:var(--gold)}
+.logo span{color:var(--white)}
+.hbtn{padding:7px 13px;border-radius:8px;border:1px solid var(--bord);background:none;color:var(--muted);font-family:var(--fn-b);font-weight:700;font-size:.86rem;cursor:pointer}
+
+/* Players bar */
+.pbar{flex:0 0 auto;display:flex;gap:8px;padding:10px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bord)}
+.pbar::-webkit-scrollbar{display:none}
+.pcard{flex:1;min-width:82px;background:var(--card);border:2px solid var(--bord);border-radius:13px;padding:8px 10px;text-align:center;position:relative;transition:border-color .2s,background .2s}
+.pcard.active{border-color:var(--gold);background:rgba(201,168,76,.09);box-shadow:0 0 16px rgba(201,168,76,.15)}
+.pc-name{font-size:.85rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard.active .pc-name{color:var(--gold)}
+.pc-mavg{font-size:.74rem;color:var(--muted);line-height:1.4;margin-bottom:2px}
+.pcard.active .pc-mavg{color:rgba(201,168,76,.65)}
+.pc-score{font-family:var(--fn-d);font-size:2.6rem;line-height:1;color:var(--white);letter-spacing:1px}
+.pcard.active .pc-score{color:var(--gold2)}
+.pc-lavg{font-size:.74rem;color:var(--muted);line-height:1.4;margin-top:2px}
+.pcard.active .pc-lavg{color:rgba(201,168,76,.65)}
+.ldots{display:flex;gap:4px;justify-content:center;margin-top:6px}
+.ldot{width:9px;height:9px;border-radius:50%;border:1px solid var(--bord);background:var(--surf)}
+.ldot.won{background:var(--gold);border-color:var(--gold)}
+.bot-b{position:absolute;top:5px;right:6px;font-size:.58rem;background:var(--green);color:#c8ffd4;border-radius:3px;padding:1px 4px;font-weight:700}
+
+/* Turn banner */
+.tbanner{flex:0 0 auto;padding:8px 14px 7px;text-align:center;border-bottom:1px solid var(--bord);background:rgba(201,168,76,.04)}
+.t-who{font-family:var(--fn-d);font-size:1.5rem;color:var(--gold);letter-spacing:2px}
+.t-sub{font-size:.82rem;color:var(--muted)}
+
+/* Bot thinking */
+.bot-think{display:none;text-align:center;padding:28px 10px;font-family:var(--fn-d);font-size:1.4rem;color:var(--muted);letter-spacing:3px}
+.bot-think.show{display:block}
+.dots::after{content:'';animation:da 1.2s infinite}
+@keyframes da{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+
+/* Input area */
+.iarea{flex:1;min-height:0;display:none;flex-direction:column;gap:11px;padding:12px 13px 14px;overflow:hidden}
+.iarea.show{display:flex}
+
+/* Score preview */
+.sprev{flex:0 0 auto;background:var(--card);border:1px solid var(--bord);border-radius:13px;padding:10px 15px}
+.sprev-lbl{font-size:.7rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.sprev-val{font-family:var(--fn-d);font-size:3.6rem;line-height:1;color:var(--white);letter-spacing:1px;transition:color .1s}
+.sprev-val.bust{color:var(--red)}
+.sprev-val.ok{color:var(--gold2)}
+.sprev-hint{font-size:.84rem;color:var(--muted);margin-top:2px;min-height:18px}
+.sprev-hint.bust{color:var(--red)}
+.sprev-hint.co{color:#5ecc6e;font-weight:700}
+
+/* Number input */
+.inp-wrap{flex:0 0 auto;background:var(--card);border:1px solid var(--bord);border-radius:13px;padding:11px 14px}
+.inp-lbl{font-size:.7rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.inp-row{display:flex;gap:9px;align-items:center}
+#si{flex:1;background:var(--surf);border:2px solid var(--bord);border-radius:10px;color:var(--white);font-family:var(--fn-d);font-size:2.2rem;letter-spacing:2px;padding:11px 14px;outline:none;text-align:center;-webkit-appearance:none;appearance:none}
+#si:focus{border-color:var(--gold)}
+#si::placeholder{color:var(--bord);font-size:1.3rem}
+#si.bust{border-color:var(--red);color:var(--red)}
+#si.ok{border-color:var(--greenl);color:var(--gold2)}
+.cbtn{padding:11px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--bg);font-family:var(--fn-d);font-size:1.2rem;letter-spacing:1px;cursor:pointer;box-shadow:0 2px 10px rgba(201,168,76,.25);white-space:nowrap;transition:all .15s;flex:0 0 auto}
+.cbtn.off{background:var(--bord);color:var(--muted);box-shadow:none;cursor:not-allowed}
+.inp-hint{font-size:.8rem;color:var(--muted);margin-top:5px;min-height:16px}
+
+/* Actions */
+.arow{flex:0 0 auto;display:flex;gap:8px}
+.abtn{flex:1;padding:13px 10px;border-radius:11px;border:1px solid var(--bord);background:var(--card);color:var(--text);font-family:var(--fn-b);font-weight:700;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.abtn:active{transform:scale(.97);background:var(--surf)}
+.abtn.voice{background:rgba(45,106,79,.16);border-color:var(--green);color:#a0e8b4}
+.abtn.voice.on{background:rgba(45,106,79,.36);border-color:var(--greenl);animation:pb 1s infinite}
+.abtn.undo{flex:0 0 auto;padding:13px 16px}
+.abtn.undo:disabled{opacity:.3;cursor:default;transform:none}
+@keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(64,145,108,.4)}50%{box-shadow:0 0 0 6px rgba(64,145,108,0)}}
+.vstatus{text-align:center;font-size:.8rem;color:var(--muted);min-height:16px}
+
+/* ── WINNER ── */
+#s-winner{align-items:center;justify-content:center;text-align:center;padding:30px;background:rgba(13,15,14,.97);z-index:50}
+.w-trophy{font-size:5rem;margin-bottom:14px;animation:bnc .5s ease}
+@keyframes bnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+.w-ttl{font-size:.9rem;letter-spacing:3px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.w-name{font-family:var(--fn-d);font-size:3.2rem;color:var(--gold);letter-spacing:2px;margin:4px 0}
+.w-sub{font-size:1rem;color:var(--muted)}
+.w-btns{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap;justify-content:center}
+.wbtn{padding:13px 24px;border-radius:11px;font-family:var(--fn-b);font-weight:700;font-size:1rem;cursor:pointer;border:1px solid var(--bord);background:var(--card);color:var(--text);transition:all .2s}
+.wbtn.p{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold);color:var(--bg)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--card);border:1px solid var(--bord);border-radius:11px;padding:10px 22px;font-weight:700;font-size:.95rem;transition:transform .25s,opacity .25s;opacity:0;z-index:200;max-width:90vw;text-align:center;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.bust{border-color:var(--red);color:var(--red)}
+#toast.checkout{border-color:#5ecc6e;color:#5ecc6e}
+#toast.info{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div class="screen" id="s-setup">
+  <div class="setup-inner">
+    <div class="s-logo">🎯 Darts<span>Master</span></div>
+    <div class="s-sub">501 · Double Out · Standalone</div>
+
+    <div class="sblk">
+      <div class="slbl">Leg per vincere</div>
+      <div class="legs-row" id="legs-sel">
+        <button class="legs-btn active" data-v="1">1</button>
+        <button class="legs-btn" data-v="2">2</button>
+        <button class="legs-btn" data-v="3">3</button>
+        <button class="legs-btn" data-v="4">4</button>
+        <button class="legs-btn" data-v="5">5</button>
+        <button class="legs-btn" data-v="7">7</button>
+      </div>
+    </div>
+
+    <div class="sblk">
+      <div class="slbl">Giocatori</div>
+      <div id="plist"></div>
+      <button class="add-p" id="addp-btn" onclick="addPlayer()">+ Aggiungi giocatore (max 4)</button>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">INIZIA PARTITA →</button>
+    <div style="height:24px"></div>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen hidden" id="s-game">
+  <header>
+    <div class="logo">🎯 Darts<span>Master</span></div>
+    <button class="hbtn" onclick="gotoSetup()">← Setup</button>
+  </header>
+  <div class="pbar" id="pbar"></div>
+  <div class="tbanner">
+    <div class="t-who" id="t-who">—</div>
+    <div class="t-sub" id="t-sub"></div>
+  </div>
+  <div class="bot-think" id="bot-think">
+    Bot sta tirando<span class="dots"></span>
+  </div>
+  <div class="iarea" id="iarea">
+    <div class="sprev">
+      <div class="sprev-lbl">Punteggio turno</div>
+      <div class="sprev-val" id="sv">—</div>
+      <div class="sprev-hint" id="sh"></div>
+    </div>
+    <div class="inp-wrap">
+      <div class="inp-lbl">Inserisci punteggio</div>
+      <div class="inp-row">
+        <input id="si" type="number" inputmode="numeric" pattern="[0-9]*"
+               min="0" max="180" placeholder="0–180"
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="cbtn off" id="cbtn" onclick="confirmScore()">SEGNA</button>
+      </div>
+      <div class="inp-hint" id="ih">Digita e premi Invio o SEGNA</div>
+    </div>
+    <div class="arow">
+      <button class="abtn voice" id="vbtn" onclick="voiceClick()">🎤 Voce</button>
+      <button class="abtn undo" id="ubtn" onclick="doUndo()" disabled>↩ Annulla</button>
+    </div>
+    <div class="vstatus" id="vstatus">Premi 🎤 e pronuncia il punteggio</div>
+  </div>
+</div>
+
+<!-- ══ WINNER ══ -->
+<div class="screen hidden" id="s-winner">
+  <div class="w-trophy">🏆</div>
+  <div class="w-ttl">VINCITORE</div>
+  <div class="w-name" id="w-name">—</div>
+  <div class="w-sub" id="w-sub"></div>
+  <div class="w-btns">
+    <button class="wbtn p" onclick="rematch()">🔄 Rivincita</button>
+    <button class="wbtn" onclick="gotoSetup()">🏠 Nuova Partita</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DART CONSTANTS
+// ═══════════════════════════════════════════════════
+const VALID = new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,164,165,167,168,170,171,174,177,180]);
+const VALID_ARR = [...VALID];
+const DOUBLES = new Set([2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,50]);
+
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+let G = null;   // game object
+let lastCfg = null;
+
+function newGame(playersCfg, legsToWin, start=501) {
+  return {
+    players: playersCfg.map(p => ({
+      name:       p.name,
+      isBot:      !!p.isBot,
+      botLow:     p.botLow  || 36,
+      botHigh:    p.botHigh || 40,
+      score:      start,
+      legs:       0,
+      legPts:     0,
+      legTurns:   0,
+      matchPts:   0,
+      matchTurns: 0,
+    })),
+    legsToWin, start,
+    current:     0,
+    history:     [],   // {isHuman, pIdx, score, snap, cur}
+    botQueue:    [],   // [{pIdx, score}] for replay after undo
+    over:        false,
+    winner:      null,
+  };
+}
+
+function snapPlayers() {
+  return G.players.map(p => ({
+    score:p.score, legs:p.legs,
+    legPts:p.legPts, legTurns:p.legTurns,
+    matchPts:p.matchPts, matchTurns:p.matchTurns
+  }));
+}
+function restorePlayers(snap, cur) {
+  snap.forEach((s,i) => Object.assign(G.players[i], s));
+  G.current = cur;
+}
+
+function applyScore(pIdx, score) {
+  const p   = G.players[pIdx];
+  const rem = p.score;
+  const nr  = rem - score;
+  const res = {bust:false, legWon:false, over:false, score};
+
+  if (nr < 0 || nr === 1) {
+    res.bust = true;
+    p.legTurns++; p.matchTurns++;
+  } else if (nr === 0) {
+    p.score = 0; p.legs++;
+    p.legTurns++; p.legPts   += score;
+    p.matchTurns++; p.matchPts += score;
+    res.legWon = true;
+    if (p.legs >= G.legsToWin) { G.over = true; G.winner = pIdx; res.over = true; }
+    else resetLeg();
+    return res;
+  } else {
+    p.score = nr;
+    p.legTurns++; p.legPts   += score;
+    p.matchTurns++; p.matchPts += score;
+  }
+  if (!G.over) G.current = (G.current + 1) % G.players.length;
+  return res;
+}
+
+function resetLeg() {
+  G.players.forEach(p => { p.score=G.start; p.legPts=0; p.legTurns=0; });
+  G.current = 0;
+}
+
+function canUndo() { return G.history.some(e => e.isHuman); }
+
+function doUndo() {
+  if (!canUndo()) return;
+  let lastH = -1;
+  for (let i = G.history.length-1; i >= 0; i--)
+    if (G.history[i].isHuman) { lastH = i; break; }
+  const replays = G.history.slice(lastH+1).map(e => ({pIdx:e.pIdx, score:e.score}));
+  const entry   = G.history[lastH];
+  restorePlayers(entry.snap, entry.cur);
+  G.history  = G.history.slice(0, lastH);
+  G.botQueue = replays;
+  G.over     = false; G.winner = null;
+  document.getElementById('si').value = '';
+  document.getElementById('bot-think').classList.remove('show');
+  toast(`↩ Annullato${replays.length ? ` · ${replays.length} bot in coda` : ''}`, 'info');
+  renderGame();
+}
+
+// ═══════════════════════════════════════════════════
+//  BOT LOGIC
+// ═══════════════════════════════════════════════════
+function botScore(rem, low, high) {
+  const avg = (low + high) / 2;
+  const std = Math.max(avg * 0.35, 10);
+
+  if (rem <= 1) return 0;
+
+  // Checkout attempt
+  if (rem <= 50 && DOUBLES.has(rem)) {
+    const pCO = 0.03 + (avg / 110) * 0.42;
+    if (Math.random() < pCO) return rem;
+  }
+
+  // Candidates: don't bust, don't leave 1
+  let cands = VALID_ARR.filter(s => s < rem && (rem - s) !== 1);
+  if (!cands.length) cands = VALID_ARR.filter(s => s < rem);
+  if (!cands.length) return 0;
+
+  // Gaussian weights around avg
+  const weights = cands.map(s => Math.exp(-((s-avg)**2)/(2*std**2)) + 1e-6);
+  const total   = weights.reduce((a,b) => a+b, 0);
+  const probs   = weights.map(w => w/total);
+  let r = Math.random(), cum = 0;
+  for (let i = 0; i < cands.length; i++) {
+    cum += probs[i];
+    if (r <= cum) return cands[i];
+  }
+  return cands[cands.length-1];
+}
+
+// ═══════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════
+let setupPlayers = [{ name:'Giocatore 1', isBot:false, botLow:36, botHigh:40 }];
+
+function renderSetup() {
+  const list = document.getElementById('plist');
+  list.innerHTML = '';
+  setupPlayers.forEach((p, i) => {
+    list.innerHTML += `
+    <div class="prow">
+      <input class="pname-in" value="${p.name}" placeholder="Nome"
+             oninput="setupPlayers[${i}].name=this.value">
+      <button class="tbot ${p.isBot?'on':''}" onclick="toggleBot(${i})">
+        ${p.isBot ? '🤖 Bot' : '👤 Umano'}
+      </button>
+      ${setupPlayers.length > 1
+        ? `<button class="rem-p" onclick="removeP(${i})">✕</button>`
+        : `<div style="width:34px"></div>`}
+      <div class="bot-cfg ${p.isBot?'show':''}" id="bc${i}">
+        <label>Media punti per turno del bot</label>
+        <div class="avg-lbl" id="al${i}">${p.botLow}–${p.botHigh} pts/turno</div>
+        <input type="range" min="1" max="17"
+               value="${Math.round((p.botLow-26)/5)+1}"
+               oninput="updateBotAvg(${i},this.value)">
+        <div class="rng-ends"><span>Principiante (26–30)</span><span>Pro (106–110)</span></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('addp-btn').style.display = setupPlayers.length >= 4 ? 'none' : 'block';
+}
+
+function toggleBot(i)    { setupPlayers[i].isBot = !setupPlayers[i].isBot; renderSetup(); }
+function removeP(i)      { setupPlayers.splice(i,1); renderSetup(); }
+function addPlayer() {
+  if (setupPlayers.length >= 4) return;
+  setupPlayers.push({ name:`Giocatore ${setupPlayers.length+1}`, isBot:false, botLow:36, botHigh:40 });
+  renderSetup();
+}
+function updateBotAvg(i, v) {
+  const low = 26 + (v-1)*5;
+  setupPlayers[i].botLow = low; setupPlayers[i].botHigh = low+4;
+  document.getElementById(`al${i}`).textContent = `${low}–${low+4} pts/turno`;
+}
+
+document.getElementById('legs-sel').addEventListener('click', e => {
+  if (!e.target.classList.contains('legs-btn')) return;
+  document.querySelectorAll('.legs-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+});
+
+function startGame() {
+  const legs = +document.querySelector('.legs-btn.active').dataset.v;
+  for (const p of setupPlayers) if (!p.name.trim()) { toast('Nome mancante','info'); return; }
+  lastCfg = { players: setupPlayers.map(p=>({...p})), legsToWin: legs };
+  G = newGame(lastCfg.players, lastCfg.legsToWin);
+  show('s-game');
+  renderGame();
+  startVoice();
+}
+
+function gotoSetup() {
+  stopVoice();
+  show('s-setup');
+  renderSetup();
+}
+
+function rematch() {
+  if (!lastCfg) { gotoSetup(); return; }
+  G = newGame(lastCfg.players, lastCfg.legsToWin);
+  show('s-game');
+  renderGame();
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER GAME
+// ═══════════════════════════════════════════════════
+function renderGame() {
+  const { players, current, legsToWin, over, winner } = G;
+
+  // Player cards
+  const bar = document.getElementById('pbar');
+  bar.innerHTML = '';
+  players.forEach((p, i) => {
+    const dots = Array.from({length:legsToWin},(_,d) =>
+      `<div class="ldot ${d<p.legs?'won':''}"></div>`).join('');
+    const ma = p.matchTurns > 0
+      ? `<div class="pc-mavg">partita Ø ${(p.matchPts/p.matchTurns).toFixed(1)}</div>`
+      : '<div class="pc-mavg"></div>';
+    const la = p.legTurns > 0
+      ? `<div class="pc-lavg">leg Ø ${(p.legPts/p.legTurns).toFixed(1)}</div>`
+      : '<div class="pc-lavg"></div>';
+    bar.innerHTML += `
+      <div class="pcard ${i===current&&!over?'active':''}">
+        ${p.isBot?'<div class="bot-b">BOT</div>':''}
+        <div class="pc-name">${p.name}</div>
+        ${ma}
+        <div class="pc-score">${p.score}</div>
+        ${la}
+        <div class="ldots">${dots}</div>
+      </div>`;
+  });
+
+  // Turn banner
+  if (!over) {
+    document.getElementById('t-who').textContent = players[current].name;
+    document.getElementById('t-sub').textContent = players[current].isBot
+      ? 'sta per tirare...' : 'inserisci il punteggio';
+  }
+
+  // Reset input
+  const si = document.getElementById('si');
+  si.value = ''; si.className = '';
+  document.getElementById('sv').textContent = '—';
+  document.getElementById('sv').className = 'sprev-val';
+  document.getElementById('sh').textContent = '';
+  document.getElementById('sh').className = 'sprev-hint';
+  document.getElementById('ih').textContent = 'Digita e premi Invio o SEGNA';
+  document.getElementById('cbtn').className = 'cbtn off';
+  document.getElementById('ubtn').disabled = !canUndo();
+
+  if (!over && players[current].isBot) {
+    document.getElementById('bot-think').classList.add('show');
+    document.getElementById('iarea').classList.remove('show');
+    setTimeout(doBotTurn, 2000);
+  } else {
+    document.getElementById('bot-think').classList.remove('show');
+    document.getElementById('iarea').classList.add('show');
+  }
+
+  if (over) showWinner(winner);
+}
+
+function doBotTurn() {
+  const idx = G.current;
+  const p   = G.players[idx];
+  let score, replayed = false;
+
+  if (G.botQueue.length && G.botQueue[0].pIdx === idx) {
+    score = G.botQueue.shift().score; replayed = true;
+  } else {
+    G.botQueue = [];
+    score = botScore(p.score, p.botLow, p.botHigh);
+    if (!VALID.has(score)) score = 0;
+  }
+
+  G.history.push({ isHuman:false, pIdx:idx, score, snap:snapPlayers(), cur:G.current });
+  const res = applyScore(idx, score);
+
+  if (res.bust)        { speak('Bust.');              toast('🚫 Bot BUST!', 'bust'); }
+  else if(res.legWon)  { speak(`${score}. Leg won!`); toast('🎯 Bot vince il leg!', 'checkout'); }
+  else                 { speak(`${score}`);            toast(`🤖 Bot: ${score}${replayed?' ↩':''}`, 'info'); }
+
+  renderGame();
+}
+
+// ═══════════════════════════════════════════════════
+//  SCORE INPUT
+// ═══════════════════════════════════════════════════
+document.getElementById('si').addEventListener('input', updatePreview);
+document.getElementById('si').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); confirmScore(); }
+});
+
+function setInputVal(n) {
+  document.getElementById('si').value = String(n);
+  updatePreview();
+}
+
+function updatePreview() {
+  const raw = document.getElementById('si').value.trim();
+  const sv  = document.getElementById('sv');
+  const sh  = document.getElementById('sh');
+  const ih  = document.getElementById('ih');
+  const btn = document.getElementById('cbtn');
+  const si  = document.getElementById('si');
+  const rem = G?.players[G.current]?.score ?? 501;
+
+  if (!raw) {
+    sv.textContent='—'; sv.className='sprev-val';
+    sh.textContent=`Rimane: ${rem}`; sh.className='sprev-hint';
+    ih.textContent='Digita e premi Invio o SEGNA';
+    btn.className='cbtn off'; si.className=''; return;
+  }
+  const n = parseInt(raw);
+  sv.textContent = isNaN(n) ? '?' : n;
+
+  if (isNaN(n) || !VALID.has(n)) {
+    sv.className='sprev-val bust'; sh.textContent='Punteggio non valido';
+    sh.className='sprev-hint bust'; ih.textContent='Impossibile con 3 freccette';
+    btn.className='cbtn off'; si.className='bust'; return;
+  }
+
+  btn.className = 'cbtn';
+  const nr = rem - n;
+  if (nr < 0 || nr === 1) {
+    sv.className='sprev-val bust'; sh.textContent=`BUST → rimane ${rem}`;
+    sh.className='sprev-hint bust'; ih.textContent='Questo punteggio causa bust';
+    si.className='bust';
+  } else if (nr === 0) {
+    sv.className='sprev-val ok'; sh.textContent='🎯 CHECKOUT!';
+    sh.className='sprev-hint co'; ih.textContent='Checkout!';
+    si.className='ok';
+  } else {
+    sv.className='sprev-val ok'; sh.textContent=`Rimane: ${nr}`;
+    sh.className='sprev-hint'; ih.textContent='Premi Invio o SEGNA';
+    si.className='ok';
+  }
+}
+
+function confirmScore() {
+  const raw = document.getElementById('si').value.trim();
+  if (!raw) return;
+  const n = parseInt(raw);
+  if (isNaN(n) || !VALID.has(n)) return;
+
+  const pIdx = G.current;
+  G.history.push({ isHuman:true, pIdx, score:n, snap:snapPlayers(), cur:pIdx });
+  G.botQueue = [];
+  const result = applyScore(pIdx, n);
+
+  if (result.bust)       { speak('Bust.');        toast('🚫 BUST!', 'bust'); }
+  else if(result.over)   { /* winner in renderGame */ }
+  else if(result.legWon) { speak('Leg won!');      toast('🏆 Leg vinto!', 'checkout'); }
+  else                   { speak(`${n}`);          toast(`✓ ${n}`, 'info'); }
+
+  document.getElementById('si').value = '';
+  renderGame();
+}
+
+function showWinner(idx) {
+  const p = G.players[idx];
+  const mavg = p.matchTurns > 0 ? (p.matchPts/p.matchTurns).toFixed(1) : '—';
+  document.getElementById('w-name').textContent = p.name;
+  document.getElementById('w-sub').textContent =
+    `${p.legs} leg vinti · media partita: ${mavg}`;
+  show('s-winner');
+  speak(`${p.name} wins the match! Congratulations!`);
+}
+
+// ═══════════════════════════════════════════════════
+//  VOICE
+//  Due modalità:
+//  A) Dentro APK (MIT App Inventor) → bridge nativo Android,
+//     zero suoni di sistema, zero cicli
+//  B) Browser normale (GitHub Pages) → Web Speech API
+// ═══════════════════════════════════════════════════
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRec = null;
+let listening  = false;
+let ttsMuted   = false;
+
+// Rilevazione ambiente App Inventor
+function isAppInventor() { return typeof window.AppInventor !== 'undefined'; }
+
+function startVoice()  { /* attivato solo su pressione tasto */ }
+function stopVoice()   { _stopRec(); }
+
+function _stopRec() {
+  listening = false;
+  if (activeRec) { try { activeRec.abort(); } catch(e){} activeRec = null; }
+  _voiceUI(false);
+}
+
+// ── Chiamata dall'APK (MIT App Inventor) quando il riconoscimento finisce
+function handleNativeVoice(text) {
+  _voiceUI(false);
+  listening = false;
+  const alts = [text.toLowerCase().trim()];
+  let found = null;
+  for (const alt of alts) {
+    const cleaned = alt.replace(/\bscore\b/g, '').trim();
+    const n = parseEN(cleaned) ?? parseEN(alt);
+    if (n !== null && n >= 0 && n <= 180 && VALID.has(n)) { found = n; break; }
+  }
+  if (found !== null) _voiceSubmit(found);
+  else toast('🎤 Non capito, riprova', 'info');
+}
+
+function voiceClick() {
+  if (!G || G.over || G.players[G.current].isBot) return;
+
+  // ── Modalità A: APK nativo
+  if (isAppInventor()) {
+    listening = true;
+    _voiceUI(true);
+    document.getElementById('vstatus').textContent = '🎤 Dì il punteggio...';
+    // Segnala all'APK di aprire il microfono nativo
+    window.AppInventor.setWebViewString('listen');
+    return;
+  }
+
+  // ── Modalità B: Web Speech API (browser)
+  if (!SR) { toast('Voce non supportata su questo browser', 'info'); return; }
+  if (listening) { _stopRec(); return; }
+  _openMic();
+}
+
+function _openMic() {
+  listening = true;
+  _voiceUI(true);
+  document.getElementById('vstatus').textContent = '🎤 Dì il punteggio...';
+
+  try {
+    activeRec = new SR();
+    activeRec.lang            = 'en-US';
+    activeRec.continuous      = false;
+    activeRec.interimResults  = false;
+    activeRec.maxAlternatives = 8;
+
+    activeRec.onresult = e => {
+      if (ttsMuted) return;
+      const res  = e.results[0];
+      const alts = [];
+      for (let i = 0; i < res.length; i++)
+        alts.push(res[i].transcript.toLowerCase().trim());
+      let found = null;
+      for (const alt of alts) {
+        const cleaned = alt.replace(/\bscore\b/g, '').trim();
+        const n = parseEN(cleaned) ?? parseEN(alt);
+        if (n !== null && n >= 0 && n <= 180 && VALID.has(n)) { found = n; break; }
+      }
+      _stopRec();
+      if (found !== null) _voiceSubmit(found);
+      else toast('🎤 Non capito, riprova', 'info');
+    };
+    activeRec.onerror = err => {
+      _stopRec();
+      if (err.error === 'not-allowed') toast('⚠️ Microfono non autorizzato', 'info');
+      else if (err.error !== 'no-speech') toast(`🎤 Errore: ${err.error}`, 'info');
+    };
+    activeRec.onend = () => { if (listening) _stopRec(); };
+    activeRec.start();
+  } catch(e) {
+    _stopRec();
+    toast('Impossibile avviare il microfono', 'info');
+  }
+}
+
+
+async function _voiceSubmit(n) {
+  setInputVal(n);
+  ttsMuted = true;
+  speak(`${n}`);
+  toast(`🎤 ${n}`, 'info');
+  await new Promise(r => setTimeout(r, 700));
+  ttsMuted = false;
+  confirmScore();
+}
+
+function _voiceUI(on) {
+  const b = document.getElementById('vbtn');
+  b.textContent = on ? '🔴 Ascolto...' : '🎤 Voce';
+  b.classList.toggle('on', on);
+  document.getElementById('vstatus').innerHTML = on
+    ? '🎤 Dì il punteggio...'
+    : 'Premi 🎤 e pronuncia il punteggio';
+}
+
+// ── English number parser ─────────────────────────
+const EN1={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19};
+const EN10={twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+function parseEN(t) {
+  t=t.toLowerCase().trim().replace(/[^a-z0-9 \-]/g,'').replace(/-/g,' ');
+  const dm=t.match(/^(\d{1,3})$/); if(dm){const n=+dm[1];if(n>=0&&n<=180)return n;}
+  t=t.replace(/\band\b/g,'').replace(/\s+/g,' ').trim();
+  const hm=t.match(/(?:one\s+)?hundred(?:\s+(.+))?$/);
+  if(hm){if(!hm[1])return 100;const r=parseEN(hm[1]);if(r!==null&&r>=1&&r<=80)return 100+r;}
+  const sh=t.match(/^one\s+(.+)$/);
+  if(sh){const r=parseEN(sh[1]);if(r!==null&&r>=10&&r<=80)return 100+r;}
+  if(EN1[t]!==undefined)return EN1[t];
+  if(EN10[t]!==undefined)return EN10[t];
+  for(const[tw,tv]of Object.entries(EN10)){
+    if(t.startsWith(tw)){const r=t.slice(tw.length).trim();if(!r)return tv;if(EN1[r]!==undefined)return tv+EN1[r];}
+  }
+  const fm=t.match(/(\d+)/);if(fm){const n=+fm[1];if(n>=0&&n<=180)return n;}
+  return null;
+}
+
+// ── TTS ───────────────────────────────────────────
+function speak(txt) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='en-US'; u.rate=1.0;
+  const voices=window.speechSynthesis.getVoices();
+  const v=voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
+  if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+
+// ── Toast ──────────────────────────────────────────
+let toastT=null;
+function toast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ── Screen helper ──────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ── Init ───────────────────────────────────────────
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.addEventListener('load',()=>setTimeout(()=>window.speechSynthesis.getVoices(),300));
+}
+renderSetup();
+</script>
+</body>
+</html>
